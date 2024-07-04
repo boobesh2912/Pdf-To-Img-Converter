@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to Image Converter</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+        form { background-color: #f0f0f0; padding: 20px; border-radius: 5px; }
+        input[type="text"], input[type="file"] { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 3px; }
+        button { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        #result { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>PDF to Image Converter</h1>
+    <form id="uploadForm">
+        <input type="hidden" id="apiKey" value="{{ api_key }}">
+        <label for="pdfFile">Select PDF file:</label>
+        <input type="file" name="file" accept=".pdf" required><br><br>
+        <label for="folderName">Folder Name (optional):</label>
+        <input type="text" name="folder_name"><br><br>
+        <button type="submit">Convert PDF</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+        var formData = new FormData(this);
+        var apiKey = document.getElementById('apiKey').value;
+
+        fetch('/convert', {
+            method: 'POST', // Ensure the method is POST
+            headers: {
+                'X-API-Key': apiKey
+            },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Network response was not ok: ${response.status}`);
+            }
+            document.getElementById('result').innerHTML = `<h2>Success</h2><p>Status Code: ${response.status}</p>`;
+            response.json().then(data => {
+                window.location.href = `/download/${data.filename}`;
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('result').innerHTML = `<h2>Error</h2><p>${error.message}</p>`;
+        });
+    });
+    </script>
+</body>
+</html>
